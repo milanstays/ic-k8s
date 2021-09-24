@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+  labels:
+    app: webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+        - name: webapp
+          image: roychandrasekhar/ic:v3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          # command: [ "/bin/sh","-c" ]
+          # args: [ "chmod 777 -R var/ generated/ pub/ && php bin/magento s:up && php bin/magento s:d:c && php bin/magento s:s:d -f  && chmod 777 -R var/ generated/ pub/ && php bin/magento c:e && php bin/magento c:f && php bin/magento c:c && php bin/magento indexer:reindex && chmod 777 -R var/ generated/ pub/" ]
+#           volumeMounts:
+#             - name: webapp-persistent-storage
+#               mountPath: /var/www/html/pub
+#       volumes:
+#       - name: webapp-persistent-storage
+#         persistentVolumeClaim:
+#           claimName: webapp-pv-claim
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: webapp-pv-claim
+#   labels:
+#     app: webapp
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+  labels:
+    run: webapp-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: webapp
